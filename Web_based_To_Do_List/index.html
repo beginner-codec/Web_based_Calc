@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-Based To-Do List</title>
+    <style>
+        /* Base reset and page layout */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vi;
+            padding: 20px;
+        }
+
+        /* Card Container styling */
+        .todo-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #333333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        /* Input area layout */
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #task-input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        #task-input:focus {
+            border-color: #4a90e2;
+        }
+
+        /* Button styling & hover transitions */
+        button {
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        #add-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        #add-btn:hover {
+            background-color: #357abd;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        /* List layout */
+        #task-list {
+            list-style: none;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        /* Dynamically generated item styling */
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9f9f9;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4a90e2;
+            transition: all 0.2s ease;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 16px;
+            color: #444444;
+            cursor: pointer;
+            word-break: break-word;
+            margin-right: 15px;
+            transition: color 0.2s ease;
+        }
+
+        /* Completed task visual modifier states */
+        .task-item.completed {
+            border-left-color: #2ecc71;
+            background-color: #f2fbf5;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: #999999;
+        }
+
+        /* Delete button styling */
+        .delete-btn {
+            background-color: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .delete-btn:hover {
+            background-color: #e74c3c;
+            color: white;
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="todo-container">
+        <h2>My To-Do List</h2>
+        
+        <!-- User Input Interface Layout -->
+        <div class="input-section">
+            <input type="text" id="task-input" placeholder="Add a new task..." autocomplete="off">
+            <button id="add-btn">Add</button>
+        </div>
+
+        <!-- Task List Target Container -->
+        <ul id="task-list"></ul>
+    </div>
+
+    <script>
+        // DOM Element Selectors
+        const taskInput = document.getElementById('task-input');
+        const addBtn = document.getElementById('add-btn');
+        const taskList = document.getElementById('task-list');
+
+        // Function: Adds a new task element dynamically to the DOM
+        function addTask() {
+            const taskContent = taskInput.value.trim();
+
+            // Validate that input string is not empty
+            if (taskContent === "") {
+                alert("Please enter a valid task.");
+                return;
+            }
+
+            // Create container element for the task item
+            const li = document.createElement('li');
+            li.className = 'task-item';
+
+            // Create span container to protect and manage task text
+            const textSpan = document.createElement('span');
+            textSpan.className = 'task-text';
+            textSpan.textContent = taskContent;
+
+            // Bind click event listener directly to text area for updating completion status
+            textSpan.addEventListener('click', function() {
+                toggleTaskStatus(li);
+            });
+
+            // Create delete button element
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = 'Delete';
+
+            // Bind click event listener to delete button for layout extraction
+            deleteBtn.addEventListener('click', function() {
+                removeTask(li);
+            });
+
+            // Assemble complete component node architecture
+            li.appendChild(textSpan);
+            li.appendChild(deleteBtn);
+            taskList.appendChild(li);
+
+            // Sanitize text input viewport for next iteration
+            taskInput.value = "";
+            taskInput.focus();
+        }
+
+        // Function: Toggles visual complete state classes 
+        function toggleTaskStatus(taskElement) {
+            taskElement.classList.toggle('completed');
+        }
+
+        // Function: Purges targeted element directly from layout instance
+        function removeTask(taskElement) {
+            taskElement.remove();
+        }
+
+        // Event Listener: Fire addition on explicit button click
+        addBtn.addEventListener('click', addTask);
+
+        // Event Listener: Fire addition on implicit Enter key up action
+        taskInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                addTask();
+            }
+        });
+    </script>
+</body>
+</html>
